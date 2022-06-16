@@ -84,7 +84,7 @@ namespace TakahashiH.Scenes.SettingScene
         /// </summary>
         protected override void DoStart()
         {
-            ChangeLevel(1);
+            ChangeLevel(0);
             ChangeFallSpeed(FallSpeedType.Low);
 
             UIFade.FadeIn(Color.black, CommonDef.FadeTimeSec, () =>
@@ -114,7 +114,7 @@ namespace TakahashiH.Scenes.SettingScene
         /// <param name="addedLevel"> 加算するレベル </param>
         private void ChangeLevel(int addedLevel)
         {
-            mLevel = Mathf.Clamp(mLevel + addedLevel, 1, CommonDef.MaxLevel);
+            mLevel = Mathf.Clamp(mLevel + addedLevel, 0, CommonDef.MaxLevel);
 
             UILevelText.text = $"Level:{mLevel}";
 
@@ -123,7 +123,7 @@ namespace TakahashiH.Scenes.SettingScene
             UILevelCursorObj.transform.SetLocalPositionX(cursorPosX);
 
             UIIncLevelButton.SetActive(mLevel < CommonDef.MaxLevel);
-            UIDecLevelButton.SetActive(mLevel > 1);
+            UIDecLevelButton.SetActive(mLevel > 0);
         }
 
         /// <summary>
