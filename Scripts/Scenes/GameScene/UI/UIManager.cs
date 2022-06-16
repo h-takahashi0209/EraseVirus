@@ -108,6 +108,8 @@ namespace TakahashiH.Scenes.GameScene
                 onReqPause();
 
                 UICommand.SetupPause(onReqResume, onReqExit);
+
+                SoundManager.PlaySe(SoundDef.ResidentScene.Se.Decide.ToString());
             };
 
             UICommand    .SetActive(false);
@@ -128,6 +130,8 @@ namespace TakahashiH.Scenes.GameScene
                 UINextButton.SetActive(false);
 
                 onClick();
+
+                SoundManager.PlaySe(SoundDef.ResidentScene.Se.Decide.ToString());
             };
         }
 

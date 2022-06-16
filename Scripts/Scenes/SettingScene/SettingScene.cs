@@ -84,19 +84,19 @@ namespace TakahashiH.Scenes.SettingScene
         /// </summary>
         protected override void DoStart()
         {
-            ChangeLevel(0);
-            ChangeFallSpeed(FallSpeedType.Low);
+            ChangeLevel(0, false);
+            ChangeFallSpeed(FallSpeedType.Low, false);
 
             UIFade.FadeIn(Color.black, CommonDef.FadeTimeSec, () =>
             {
-                UIIncLevelButton.OnClick = () => ChangeLevel(1);
-                UIDecLevelButton.OnClick = () => ChangeLevel(-1);
+                UIIncLevelButton.OnClick = () => ChangeLevel( 1, true);
+                UIDecLevelButton.OnClick = () => ChangeLevel(-1, true);
 
                 for (int i = 0; i < UIFallSpeedButtonList.Length; i++)
                 {
                     var fallSpeedType = (FallSpeedType)i;
 
-                    UIFallSpeedButtonList[i].OnClick = () => ChangeFallSpeed(fallSpeedType);
+                    UIFallSpeedButtonList[i].OnClick = () => ChangeFallSpeed(fallSpeedType, true);
                 }
 
                 UIStartButton.OnClick = () => StartGame();
@@ -111,8 +111,9 @@ namespace TakahashiH.Scenes.SettingScene
         /// <summary>
         /// レベル変更
         /// </summary>
-        /// <param name="addedLevel"> 加算するレベル </param>
-        private void ChangeLevel(int addedLevel)
+        /// <param name="addedLevel">    加算するレベル     </param>
+        /// <param name="isPlaySe">      SE を再生するか    </param>
+        private void ChangeLevel(int addedLevel, bool isPlaySe)
         {
             mLevel = Mathf.Clamp(mLevel + addedLevel, 0, CommonDef.MaxLevel);
 
@@ -124,19 +125,30 @@ namespace TakahashiH.Scenes.SettingScene
 
             UIIncLevelButton.SetActive(mLevel < CommonDef.MaxLevel);
             UIDecLevelButton.SetActive(mLevel > 0);
+
+            if (isPlaySe)
+            {
+                SoundManager.PlaySe(SoundDef.ResidentScene.Se.Select.ToString());
+            }
         }
 
         /// <summary>
         /// 落下速度種別変更
         /// </summary>
-        /// <param name="fallSpeedType"> 落下速度種別 </param>
-        private void ChangeFallSpeed(FallSpeedType fallSpeedType)
+        /// <param name="fallSpeedType">    落下速度種別       </param>
+        /// <param name="isPlaySe">         SE を再生するか    </param>
+        private void ChangeFallSpeed(FallSpeedType fallSpeedType, bool isPlaySe)
         {
             mFallSpeedType = fallSpeedType;
 
             float cursorPosX = UIFallSpeedButtonList[(int)fallSpeedType].GetLocalPositionX();
 
             UIFallSpeedButtonCursorObj.transform.SetLocalPositionX(cursorPosX);
+
+            if (isPlaySe)
+            {
+                SoundManager.PlaySe(SoundDef.ResidentScene.Se.Select.ToString());
+            }
         }
 
         /// <summary>
@@ -144,6 +156,8 @@ namespace TakahashiH.Scenes.SettingScene
         /// </summary>
         private void StartGame()
         {
+            UIStartButton.enabled = false;
+
             var inputData = new GameScene.GameScene.InputData()
             {
                 Level         = mLevel,
@@ -154,6 +168,8 @@ namespace TakahashiH.Scenes.SettingScene
             {
                 SceneManager.Load(SceneType.GameScene, inputData);
             });
+
+            SoundManager.PlaySe(SoundDef.ResidentScene.Se.Decide.ToString());
         }
     }
 }

@@ -46,17 +46,32 @@ namespace TakahashiH.Scenes.GameScene
         public override void Process(IStateInputData inputData)
         {
             var myInputData = inputData as InputData;
+            var task        = new ParallelTask();
 
-            var task = new ParallelTask();
+            bool isDisappear = false;
 
             // 4つ以上揃ったカプセルを消滅させる
             for (int i = 0; i < myInputData.HalfCapsuleList.Count; i++)
             {
                 var block = myInputData.HalfCapsuleList[i];
 
-                task.Push(onComp => Disappear(block.BlockPosX, block.BlockPosY, block.ColorType, CapsuleDirection.Vertial   , onComp));
-                task.Push(onComp => Disappear(block.BlockPosX, block.BlockPosY, block.ColorType, CapsuleDirection.Horizontal, onComp));
+                task.Push(onComp =>
+                {
+                    isDisappear |= Disappear(block.BlockPosX, block.BlockPosY, block.ColorType, CapsuleDirection.Vertial   , onComp);
+                });
+
+                task.Push(onComp =>
+                {
+                    isDisappear |= Disappear(block.BlockPosX, block.BlockPosY, block.ColorType, CapsuleDirection.Horizontal, onComp);
+                });
             }
+
+            task.Push(() =>
+            {
+                string soundName = isDisappear ? SoundDef.GameScene.Se.DisappearCapsule.ToString() : SoundDef.GameScene.Se.CompFallCapsule.ToString();
+
+                SoundManager.PlaySe(soundName);
+            });
 
             // 次のステートへ
             task.Process(() =>
@@ -96,12 +111,13 @@ namespace TakahashiH.Scenes.GameScene
         /// <summary>
         /// 4つ揃ったカプセルを消滅させる
         /// </summary>
-        /// <param name="blockPosX">           Xブロック座標         </param>
-        /// <param name="blockPosY">           Yブロック座標         </param>
-        /// <param name="colorType">           色種別                </param>
-        /// <param name="checkedDirection">    判定する方向          </param>
-        /// <param name="onComplete">          完了時コールバック    </param>
-        private void Disappear(int blockPosX, int blockPosY, ColorType colorType, CapsuleDirection checkedDirection, Action onComplete)
+        /// <param name="blockPosX">           Xブロック座標             </param>
+        /// <param name="blockPosY">           Yブロック座標             </param>
+        /// <param name="colorType">           色種別                    </param>
+        /// <param name="checkedDirection">    判定する方向              </param>
+        /// <param name="onComplete">          完了時コールバック        </param>
+        /// <returns>                          カプセルを消滅させたか    </returns>
+        private bool Disappear(int blockPosX, int blockPosY, ColorType colorType, CapsuleDirection checkedDirection, Action onComplete)
         {
             int checkedDirectionX = checkedDirection == CapsuleDirection.Horizontal ? 1 : 0;
             int checkedDirectionY = checkedDirection == CapsuleDirection.Vertial    ? 1 : 0;
@@ -125,10 +141,14 @@ namespace TakahashiH.Scenes.GameScene
                 task.Push(onComp => Disappear(blockPosX, blockPosY, colorType, -checkedDirectionX, -checkedDirectionY, onComp));
 
                 task.Process(onComplete);
+
+                return true;
             }
             else
             {
                 onComplete();
+
+                return false;
             }
         }
 

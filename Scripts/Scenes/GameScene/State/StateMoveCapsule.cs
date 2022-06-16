@@ -187,6 +187,8 @@ namespace TakahashiH.Scenes.GameScene
         private void Rotate(RotateDirection direction)
         {
             mContext.CurrentCapsule.Rotate(direction);
+
+            SoundManager.PlaySe(SoundDef.GameScene.Se.MoveCapsule.ToString());
         }
 
         /// <summary>
@@ -208,6 +210,8 @@ namespace TakahashiH.Scenes.GameScene
             }
 
             mContext.CurrentCapsule.UpdatePosition(blockPosX, mContext.CurrentCapsule.BlockPositionY);
+
+            SoundManager.PlaySe(SoundDef.GameScene.Se.MoveCapsule.ToString());
         }
 
         /// <summary>
@@ -306,6 +310,10 @@ namespace TakahashiH.Scenes.GameScene
 
                 // カプセル消滅ステートへ遷移
                 mOnComplete(State.DisappearCapsule, inputData);
+            }
+            else
+            {
+                SoundManager.PlaySe(SoundDef.GameScene.Se.MoveCapsule.ToString());
             }
         }
 

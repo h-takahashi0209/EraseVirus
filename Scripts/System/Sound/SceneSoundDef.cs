@@ -9,28 +9,6 @@ namespace TakahashiH
     public static class SoundDef
     {
         /// <summary>
-        /// MiniGameSelectScene
-        /// </summary>
-        public static class MiniGameSelectScene
-        {
-            /// <summary>
-            /// Se
-            /// </summary>
-            public enum Se
-            {
-                Sizeof,
-            }
-
-            /// <summary>
-            /// Bgm
-            /// </summary>
-            public enum Bgm
-            {
-                Sizeof,
-            }
-        }
-
-        /// <summary>
         /// ResidentScene
         /// </summary>
         public static class ResidentScene
@@ -40,88 +18,10 @@ namespace TakahashiH
             /// </summary>
             public enum Se
             {
-                ButtonCancel    ,
-                ButtonDecide    ,
-                Sizeof          ,
-            }
-
-            /// <summary>
-            /// Bgm
-            /// </summary>
-            public enum Bgm
-            {
-                Sizeof,
-            }
-        }
-
-        /// <summary>
-        /// ThreeDBattleScene
-        /// </summary>
-        public static class ThreeDBattleScene
-        {
-            /// <summary>
-            /// Se
-            /// </summary>
-            public enum Se
-            {
-                Sizeof,
-            }
-
-            /// <summary>
-            /// Bgm
-            /// </summary>
-            public enum Bgm
-            {
-                Sizeof,
-            }
-        }
-
-        /// <summary>
-        /// TiltRaceScene
-        /// </summary>
-        public static class TiltRaceScene
-        {
-            /// <summary>
-            /// SE
-            /// </summary>
-            public enum Se
-            {
-                Cancel          ,
-                Count           ,
-                Decide          ,
-                Engine          ,
-                GameOver        ,
-                Hit             ,
-                RecoveryLife    ,
-                Start           ,
-                SpeedDown       ,
-                SpeedUp         ,
-                Telop           ,
-                Sizeof          ,
-            }
-
-            /// <summary>
-            /// BGM Ží•Ê
-            /// </summary>
-            public enum Bgm
-            {
-                Race    ,
+                Select  ,
+                Decide  ,
                 Sizeof  ,
             }
-        }
-
-        /// <summary>
-        /// TitleScene
-        /// </summary>
-        public static class TitleScene
-        {
-            /// <summary>
-            /// Se
-            /// </summary>
-            public enum Se
-            {
-                Sizeof,
-            }
 
             /// <summary>
             /// Bgm
@@ -129,6 +29,35 @@ namespace TakahashiH
             public enum Bgm
             {
                 Sizeof,
+            }
+        }
+
+        /// <summary>
+        /// GameScene
+        /// </summary>
+        public static class GameScene
+        {
+            /// <summary>
+            /// Se
+            /// </summary>
+            public enum Se
+            {
+                MoveCapsule         ,
+                CompFallCapsule     ,
+                DisappearCapsule    ,
+                StageClear          ,
+                AllClear            ,
+                GameOver            ,
+                Sizeof              ,
+            }
+
+            /// <summary>
+            /// Bgm
+            /// </summary>
+            public enum Bgm
+            {
+                GameScene   ,
+                Sizeof      ,
             }
         }
     }

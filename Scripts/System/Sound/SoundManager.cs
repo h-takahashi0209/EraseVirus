@@ -77,7 +77,9 @@ namespace TakahashiH
                 return;
             }
 
-            var sceneSoundData = Resources.Load<SceneSoundData>(Path.Common.SoundData.Format(sceneType.ToString()));
+            string path = $"{Path.Common.SoundData}{sceneType}/{sceneType}SoundData";
+
+            var sceneSoundData = Resources.Load<SceneSoundData>(path);
             if (sceneSoundData == null) {
                 return;
             }
@@ -94,7 +96,9 @@ namespace TakahashiH
                 return;
             }
 
-            var sceneSoundData = Resources.Load<SceneSoundData>(Path.Common.SoundData.Format(SceneType.ResidentScene.ToString()));
+            string path = $"{Path.Common.SoundData}{SceneType.ResidentScene}/{SceneType.ResidentScene}SoundData";
+
+            var sceneSoundData = Resources.Load<SceneSoundData>(path);
             if (sceneSoundData == null) {
                 return;
             }
@@ -152,6 +156,26 @@ namespace TakahashiH
             }
 
             audioSource.Stop();
+        }
+
+        /// <summary>
+        /// 再開
+        /// </summary>
+        /// <param name="soundHandle"> サウンドハンドル </param>
+        public static void Replay(ISoundHandle soundHandle)
+        {
+            if (msInstance == null)
+            {
+                return;
+            }
+
+            var audioSource = GetAudioSource(soundHandle);
+            if (audioSource == null)
+            {
+                return;
+            }
+
+            audioSource.Play();
         }
 
         /// <summary>

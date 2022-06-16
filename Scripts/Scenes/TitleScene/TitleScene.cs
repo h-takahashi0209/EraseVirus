@@ -36,6 +36,8 @@ namespace TakahashiH.Scenes.TitleScene
                     {
                         SceneManager.Load(SceneType.SettingScene);
                     });
+
+                    SoundManager.PlaySe(SoundDef.ResidentScene.Se.Decide.ToString());
                 };
             });
         }

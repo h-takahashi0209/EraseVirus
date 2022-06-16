@@ -30,10 +30,13 @@ namespace TakahashiH.Scenes.GameScene
         /// <param name="inputData"> 他のステートから渡されるデータ </param>
         public override void Process(IStateInputData inputData)
         {
-            var isAllClear = (mContext.Level >= CommonDef.MaxLevel);
-            var telopType  = isAllClear ? UITelop.TelopType.AllClear : UITelop.TelopType.StageClear;
+            var isAllClear  = (mContext.Level >= CommonDef.MaxLevel);
+            var telopType   = isAllClear ? UITelop.TelopType.AllClear : UITelop.TelopType.StageClear;
+            var clearSeName = isAllClear ? SoundDef.GameScene.Se.AllClear.ToString() : SoundDef.GameScene.Se.StageClear.ToString();
 
             mContext.UIManager.SetActivePauseButton(false);
+
+            SoundManager.PlaySe(clearSeName);
 
             // テロップ再生
             mContext.UIManager.Telop.Play(telopType, () =>

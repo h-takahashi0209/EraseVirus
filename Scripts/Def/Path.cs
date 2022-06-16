@@ -14,7 +14,7 @@ namespace TakahashiH
             /// <summary>
             /// サウンドデータ
             /// </summary>
-            public static string SoundData = "ScriptableObjects/System/SoundData/{0}";
+            public static string SoundData = "ScriptableObjects/Scenes/";
         }
 
         /// <summary>

@@ -80,6 +80,11 @@ namespace TakahashiH.Scenes.GameScene
         /// </summary>
         private StateContext mContext;
 
+        /// <summary>
+        /// BGM ハンドル
+        /// </summary>
+        private ISoundHandle mBgmHandle;
+
 
         //====================================
         //! 関数（SceneBase）
@@ -91,39 +96,20 @@ namespace TakahashiH.Scenes.GameScene
         protected override void DoStart()
         {
             var sceneInputData = SceneManager.SceneInputData as InputData;
+
             if (sceneInputData == null)
             {
-                Debug.LogWarning("ゲームシーンの入力データ受け取りに失敗しました。");
+                Debug.LogWarning("GameScene の入力データ受け取りに失敗しました。");
 
                 sceneInputData = new InputData()
                 {
-                    FallSpeedType = FallSpeedType.Low,
-                    Level         = 1
+                    Level = 0,
+                    FallSpeedType = FallSpeedType.Low
                 };
             }
 
-            SpriteLoader.CreateInstance();
-
-            Settings     .Load();
-            SpriteLoader .Load();
-
-            ObjectStack.Setup();
-
-            UIManager.Setup(Pause, Resume, Exit);
-
-            mContext = new StateContext(ObjectStack, CurrentCapsule, UIManager, sceneInputData.Level, sceneInputData.FallSpeedType);
-
-            mStateList = new StateBase[]
-            {
-                new StateGenerateStage      (mContext, ProcessNextState, mStageLoader),
-                new StateAppearCapsule      (mContext, ProcessNextState, UIManager.NextCapsule),
-                new StateMoveCapsule        (mContext, ProcessNextState, InputManager),
-                new StateDisappearCapsule   (mContext, ProcessNextState),
-                new StateFallCapsule        (mContext, ProcessNextState),
-                new StateGameOver           (mContext, ProcessNextState),
-                new StateGameClear          (mContext, ProcessNextState),
-            };
-
+            Load();
+            Setup(sceneInputData);
             ProcessNextState(State.GenerateStage);
 
             UIFade.FadeIn(Color.black, CommonDef.FadeTimeSec);
@@ -149,6 +135,8 @@ namespace TakahashiH.Scenes.GameScene
 
             Settings     .Dispose();
             SpriteLoader .Dispose();
+
+            SoundManager.DisposeSceneSoundData();
         }
 
 
@@ -157,12 +145,51 @@ namespace TakahashiH.Scenes.GameScene
         //====================================
 
         /// <summary>
+        /// 読み込み
+        /// </summary>
+        private void Load()
+        {
+            Settings.Load();
+
+            SpriteLoader.CreateInstance();
+            SpriteLoader.Load();
+
+            SoundManager.LoadSceneSoundData(SceneType.GameScene);
+        }
+
+        /// <summary>
+        /// セットアップ
+        /// </summary>
+        /// <param name="inputData"> 他シーンから渡されるデータ </param>
+        private void Setup(InputData inputData)
+        {
+            ObjectStack.Setup();
+
+            UIManager.Setup(Pause, Resume, Exit);
+
+            mContext = new StateContext(ObjectStack, CurrentCapsule, UIManager, inputData.Level, inputData.FallSpeedType);
+
+            mStateList = new StateBase[]
+            {
+                new StateGenerateStage      (mContext, ProcessNextState, mStageLoader),
+                new StateAppearCapsule      (mContext, ProcessNextState, UIManager.NextCapsule),
+                new StateMoveCapsule        (mContext, ProcessNextState, InputManager),
+                new StateDisappearCapsule   (mContext, ProcessNextState),
+                new StateFallCapsule        (mContext, ProcessNextState),
+                new StateGameOver           (mContext, ProcessNextState),
+                new StateGameClear          (mContext, ProcessNextState),
+            };
+        }
+
+        /// <summary>
         /// 次のステート実行
         /// </summary>
         /// <param name="nextState">    実行するステート                  </param>
         /// <param name="inputData">    他のステートから渡されるデータ    </param>
         private void ProcessNextState(State nextState, IStateInputData inputData = null)
         {
+            PlayAndStopBgm(nextState);
+
             if (nextState == State.Finished)
             {
                 Exit();
@@ -180,6 +207,8 @@ namespace TakahashiH.Scenes.GameScene
         private void Pause()
         {
             mCurrentState?.Pause();
+
+            SoundManager.Pause(mBgmHandle);
         }
 
         /// <summary>
@@ -188,6 +217,39 @@ namespace TakahashiH.Scenes.GameScene
         private void Resume()
         {
             mCurrentState?.Resume();
+
+            SoundManager.Resume(mBgmHandle);
+        }
+
+        /// <summary>
+        /// ステートに合わせて BGM を再生 / 停止
+        /// </summary>
+        /// <param name="state"> ステート </param>
+        private void PlayAndStopBgm(State state)
+        {
+            switch (state)
+            {
+                case State.GenerateStage:
+                    {
+                        if (mBgmHandle == null)
+                        {
+                            mBgmHandle = SoundManager.PlayBgm(SoundDef.GameScene.Bgm.GameScene.ToString(), true);
+                        }
+                        else
+                        {
+                            SoundManager.Replay(mBgmHandle);
+                        }
+                    }
+                    break;
+
+                case State.GameClear:
+                case State.GameOver:
+                case State.Finished:
+                    {
+                        SoundManager.Stop(mBgmHandle);
+                    }
+                    break;
+            }
         }
 
         /// <summary>

@@ -86,6 +86,8 @@ namespace TakahashiH.Scenes.GameScene
                     gameObject.SetActive(false);
                     onClickTopButton();
                 };
+
+                SoundManager.PlaySe(SoundDef.ResidentScene.Se.Decide.ToString());
             };
 
             UIBottomButton.OnClick = () =>
@@ -95,6 +97,8 @@ namespace TakahashiH.Scenes.GameScene
                     gameObject.SetActive(false);
                     onClickBottomButton();
                 };
+
+                SoundManager.PlaySe(SoundDef.ResidentScene.Se.Decide.ToString());
             };
         }
     }

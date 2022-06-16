@@ -207,6 +207,8 @@ namespace TakahashiH.Scenes.GameScene
             else
             {
                 mAutoFallTimer.Begin(Settings.CapsuleDisappearFallTimeSec, () => FallCapsule());
+
+                SoundManager.PlaySe(SoundDef.GameScene.Se.MoveCapsule.ToString());
             }
         }
 

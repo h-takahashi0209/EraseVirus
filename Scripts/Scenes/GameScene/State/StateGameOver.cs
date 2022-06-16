@@ -30,6 +30,8 @@ namespace TakahashiH.Scenes.GameScene
         /// <param name="inputData"> 他のステートから渡されるデータ </param>
         public override void Process(IStateInputData inputData)
         {
+            SoundManager.PlaySe(SoundDef.GameScene.Se.GameOver.ToString());
+
             mContext.UIManager.Telop.Play(UITelop.TelopType.GameOver, () =>
             {
                 mContext.UIManager.Telop.Hide();
