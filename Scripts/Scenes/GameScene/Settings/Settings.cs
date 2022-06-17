@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 
@@ -38,6 +39,21 @@ namespace TakahashiH.Scenes.GameScene
         /// </summary>
         [SerializeField] private float mCapsuleDisappearFallTimeSec;
 
+        /// <summary>
+        /// カプセル着地後の移動可能時間（秒）
+        /// </summary>
+        [SerializeField] private float mCapsuleCompFallMoveTimeSec;
+
+        /// <summary>
+        /// ステージ構築モード
+        /// </summary>
+        [SerializeField] private GenerateStageMode mGenerateStageMode;
+
+        /// <summary>
+        /// 強制固定させるカプセル色リスト
+        /// </summary>
+        [SerializeField] private ColorType[] mForceColorTypeList = new ColorType[2];
+
 
         //====================================
         //! プロパティ
@@ -52,6 +68,21 @@ namespace TakahashiH.Scenes.GameScene
         /// カプセル消滅時の落下にかかる時間（秒）
         /// </summary>
         public static float CapsuleDisappearFallTimeSec => msInstance.mCapsuleDisappearFallTimeSec;
+
+        /// <summary>
+        /// カプセル着地後の移動可能時間（秒）
+        /// </summary>
+        public static float CapsuleCompFallMoveTimeSec => msInstance.mCapsuleCompFallMoveTimeSec;
+
+        /// <summary>
+        /// ステージ構築モード
+        /// </summary>
+        public static GenerateStageMode GenerateStageMode => msInstance.mGenerateStageMode;
+
+        /// <summary>
+        /// 強制固定させるカプセル色リスト
+        /// </summary>
+        public static IReadOnlyList<ColorType> ForceColorTypeList => msInstance.mForceColorTypeList;
 
 
         //====================================

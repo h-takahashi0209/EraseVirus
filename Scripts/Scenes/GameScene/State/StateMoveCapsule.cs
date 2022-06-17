@@ -33,6 +33,16 @@ namespace TakahashiH.Scenes.GameScene
         private Timer mFallByInputTimer = new Timer();
 
         /// <summary>
+        /// カプセル着地時の移動用タイマー
+        /// </summary>
+        private Timer mCompFallMoveTimer = new Timer();
+
+        /// <summary>
+        /// カプセル着地時の移動中か
+        /// </summary>
+        private bool mIsCompFallMove = false;
+
+        /// <summary>
         /// 入力によるカプセル落下中か
         /// </summary>
         private bool mIsFallByInput;
@@ -64,7 +74,7 @@ namespace TakahashiH.Scenes.GameScene
             mAutoFallTimeSec = Settings.GetAutoFallCapsuleTimeSec(mContext.FallSpeedType);
 
             mInputManager.OnReqMove   = moveDirection   => Move(moveDirection);
-            mInputManager.OnReqFall   = ()              => FallCapsule();
+            mInputManager.OnReqFall   = ()              => FallCapsule(false);
             mInputManager.OnReqRotate = rotateDirection => Rotate(rotateDirection);
         }
 
@@ -93,7 +103,7 @@ namespace TakahashiH.Scenes.GameScene
                 return;
             }
 
-            mAutoFallTimer.UpdateTimer(TimeManager.DeltaTime);
+            mCompFallMoveTimer .UpdateTimer(TimeManager.DeltaTime);
 
             // 入力中は一定時間ごとにカプセルを落下させる
             if (mIsFallByInput)
@@ -104,6 +114,10 @@ namespace TakahashiH.Scenes.GameScene
                 }
 
                 mFallByInputTimer.UpdateTimer(TimeManager.DeltaTime);
+            }
+            else
+            {
+                mAutoFallTimer.UpdateTimer(TimeManager.DeltaTime);
             }
 
             mIsFallByInputPrevFrame = mIsFallByInput;
@@ -125,8 +139,9 @@ namespace TakahashiH.Scenes.GameScene
         {
             mIsPause = true;
 
-            mAutoFallTimer    .Pause();
-            mFallByInputTimer .Pause();
+            mAutoFallTimer     .Pause();
+            mFallByInputTimer  .Pause();
+            mCompFallMoveTimer .Pause();
 
             mInputManager.SetEnableInput(false);
         }
@@ -138,8 +153,9 @@ namespace TakahashiH.Scenes.GameScene
         {
             mIsPause = false;
 
-            mAutoFallTimer    .Resume();
-            mFallByInputTimer .Resume();
+            mAutoFallTimer     .Resume();
+            mFallByInputTimer  .Resume();
+            mCompFallMoveTimer .Resume();
 
             mInputManager.SetEnableInput(true);
         }
@@ -149,7 +165,7 @@ namespace TakahashiH.Scenes.GameScene
         /// </summary>
         public void DragFallCapsule()
         {
-            FallCapsule();
+            FallCapsule(false);
         }
 
 
@@ -200,7 +216,7 @@ namespace TakahashiH.Scenes.GameScene
             int blockPosX = mContext.CurrentCapsule.BlockPositionX;
             int blockPosY = mContext.CurrentCapsule.BlockPositionY;
 
-            bool canMoveLeft  = (blockPosX > 0 && GetColorType(blockPosX - 1, blockPosY) == ColorType.None);
+            bool canMoveLeft  = CanMoveLeft(blockPosX, blockPosY);
             bool canMoveRight = CanMoveRight(blockPosX, blockPosY);
 
             switch (direction)
@@ -215,6 +231,37 @@ namespace TakahashiH.Scenes.GameScene
         }
 
         /// <summary>
+        /// 左移動可能か
+        /// </summary>
+        /// <param name="blockPosX">    Xブロック座標    </param>
+        /// <param name="blockPosY">    Yブロック座標    </param>
+        private bool CanMoveLeft(int blockPosX, int blockPosY)
+        {
+            // 左端は移動不可
+            if (blockPosX == 0)
+            {
+                return false;
+            }
+
+            // 1つ右隣にカプセルかウイルスがいたら移動不可
+            if (GetColorType(blockPosX - 1, blockPosY) != ColorType.None)
+            {
+                return false;
+            }
+
+            // 縦向きで左上にカプセルかウイルスがいたら移動不可
+            if (mContext.CurrentCapsule.Direction == CapsuleDirection.Vertial)
+            {
+                if (GetColorType(blockPosX - 1, blockPosY + 1) != ColorType.None)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
         /// 右移動可能か
         /// </summary>
         /// <param name="blockPosX">    Xブロック座標    </param>
@@ -224,14 +271,14 @@ namespace TakahashiH.Scenes.GameScene
             // 縦向き
             if (mContext.CurrentCapsule.Direction == CapsuleDirection.Vertial)
             {
-                // 右端は右移動不可
+                // 右端は移動不可
                 if (blockPosX >= GameSceneDef.BlockNumWidth - 1)
                 {
                     return false;
                 }
 
-                // 1つ右隣にカプセルかウイルスがいたら右移動不可
-                if (GetColorType(blockPosX + 1, blockPosY) != ColorType.None)
+                // 1つ右隣にカプセルかウイルスがいたら移動不可
+                if (GetColorType(blockPosX + 1, blockPosY) != ColorType.None || GetColorType(blockPosX + 1, blockPosY + 1) != ColorType.None)
                 {
                     return false;
                 }
@@ -240,13 +287,13 @@ namespace TakahashiH.Scenes.GameScene
             // 横向き
             else if (mContext.CurrentCapsule.Direction == CapsuleDirection.Horizontal)
             {
-                // 右端の1つ左が実質右端になるので右移動不可
+                // 右端の1つ左が実質右端になるので移動不可
                 if (blockPosX >= GameSceneDef.BlockNumWidth - 2)
                 {
                     return false;
                 }
 
-                // 2つ右隣にカプセルかウイルスがいたら右移動不可
+                // 2つ右隣にカプセルかウイルスがいたら移動不可
                 if (GetColorType(blockPosX + 2, blockPosY) != ColorType.None)
                 {
                     return false;
@@ -261,7 +308,7 @@ namespace TakahashiH.Scenes.GameScene
         /// </summary>
         private void AutoFallCapsule()
         {
-            FallCapsule();
+            FallCapsule(true);
 
             mAutoFallTimer.Begin(mAutoFallTimeSec, () => AutoFallCapsule());
         }
@@ -271,7 +318,7 @@ namespace TakahashiH.Scenes.GameScene
         /// </summary>
         private void InputFallCapsule()
         {
-            FallCapsule();
+            FallCapsule(false);
 
             mFallByInputTimer.Begin(Settings.CapsuleForceFallTimeSec, () => InputFallCapsule());
         }
@@ -279,20 +326,49 @@ namespace TakahashiH.Scenes.GameScene
         /// <summary>
         /// カプセルを落とす
         /// </summary>
-        private void FallCapsule()
+        /// <param name="isAutoFall"> 自動落下か </param>
+        private void FallCapsule(bool isAutoFall)
         {
+            if (mCompFallMoveTimer.IsActive) {
+                return;
+            }
+
             int currentBlockPosX = mContext.CurrentCapsule.BlockPositionX;
             int currentBlockPosY = Math.Max(mContext.CurrentCapsule.BlockPositionY - 1, 0);
 
-            mContext.CurrentCapsule.UpdatePosition(currentBlockPosX, currentBlockPosY);
+            bool isHorizontal = mContext.CurrentCapsule.Direction == CapsuleDirection.Horizontal;
+
+            // 1つ下に何も無ければ落下
+            if (GetColorType(currentBlockPosX, currentBlockPosY) == ColorType.None && (!isHorizontal || GetColorType(currentBlockPosX + 1, currentBlockPosY) == ColorType.None))
+            {
+                mContext.CurrentCapsule.UpdatePosition(currentBlockPosX, currentBlockPosY);
+            }
+            // 落下できなければ位置は変わらない
+            else
+            {
+                currentBlockPosY = mContext.CurrentCapsule.BlockPositionY;
+            }
 
             bool isCompFall = (currentBlockPosY <= 0);
             isCompFall |= (currentBlockPosY > 0 && GetColorType(currentBlockPosX, currentBlockPosY - 1) != ColorType.None);
-            isCompFall |= (currentBlockPosY > 0 && mContext.CurrentCapsule.Direction == CapsuleDirection.Horizontal && GetColorType(currentBlockPosX + 1, currentBlockPosY - 1) != ColorType.None);
+            isCompFall |= (currentBlockPosY > 0 && isHorizontal && GetColorType(currentBlockPosX + 1, currentBlockPosY - 1) != ColorType.None);
 
             // カプセル着地
             if (isCompFall)
             {
+                // 自動落下で着地した場合、一定時間左右移動可能
+                if (isAutoFall && !mIsCompFallMove)
+                {
+                    mCompFallMoveTimer.Begin(Settings.CapsuleCompFallMoveTimeSec, null);
+                    mIsCompFallMove = true;
+                    return;
+                }
+
+                mIsCompFallMove = false;
+
+                currentBlockPosX = mContext.CurrentCapsule.BlockPositionX;
+                currentBlockPosY = mContext.CurrentCapsule.BlockPositionY;
+
                 int pairedBlockPosX = currentBlockPosX + (mContext.CurrentCapsule.Direction == CapsuleDirection.Horizontal ? 1 : 0);
                 int pairedBlockPosY = currentBlockPosY + (mContext.CurrentCapsule.Direction == CapsuleDirection.Vertial    ? 1 : 0);
 

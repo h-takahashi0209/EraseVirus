@@ -15,20 +15,11 @@ namespace TakahashiH.Scenes.GameScene
         //====================================
 
         /// <summary>
-        /// モード
-        /// </summary>
-        public enum Mode
-        {
-            LoadFile    ,
-            Random      ,
-        }
-
-        /// <summary>
         /// オブジェクト識別子
         /// </summary>
         private enum ObjectId
         {
-            None = -1           ,
+            None                ,
             EnemyRed            ,
             EnemyBlue           ,
             EnemyYellow         ,
@@ -58,16 +49,16 @@ namespace TakahashiH.Scenes.GameScene
         /// <summary>
         /// セットアップ
         /// </summary>
-        /// <param name="mode">           モード                  </param>
-        /// <param name="level">          レベル                  </param>
         /// <param name="objectStack">    オブジェクトスタック    </param>
         /// <returns>                     読み込みに成功したか    </returns>
-        public bool Setup(Mode mode, int level, ObjectStack objectStack)
+        public bool Setup(int level, ObjectStack objectStack)
         {
-            switch (mode)
+            objectStack.ClearStack();
+
+            switch (Settings.GenerateStageMode)
             {
-                case Mode.LoadFile : return LoadFile (level, objectStack);
-                case Mode.Random   : return Lottery  (level, objectStack);
+                case GenerateStageMode.LoadFile : return LoadFile (level, objectStack);
+                case GenerateStageMode.Random   : return Lottery  (level, objectStack);
             }
 
             return false;
@@ -101,8 +92,6 @@ namespace TakahashiH.Scenes.GameScene
             // ゲーム上は左下を (0, 0) とする
             // テキスト上だと先頭は (15, 0) なので反転させる
             Array.Reverse(lineList);
-
-            objectStack.ClearStack();
 
             for (int y = 0; y < lineList.Length; y++)
             {
@@ -161,7 +150,7 @@ namespace TakahashiH.Scenes.GameScene
                 int x = block % GameSceneDef.BlockNumWidth;
                 int y = block / GameSceneDef.BlockNumWidth;
 
-                var objectId = (ObjectId)UnityEngine.Random.Range((int)ColorType.Red, (int)ColorType.Yellow + 1);
+                var objectId = (ObjectId)UnityEngine.Random.Range((int)ObjectId.EnemyRed, (int)ObjectId.EnemyYellow + 1);
 
                 PushObject(objectId, objectStack, x, y);
 

@@ -83,6 +83,15 @@ namespace TakahashiH.Scenes.GameScene
     }
 
     /// <summary>
+    /// ステージ構築モード
+    /// </summary>
+    public enum GenerateStageMode
+    {
+        Random      ,
+        LoadFile    ,
+    }
+
+    /// <summary>
     /// 数値定義
     /// </summary>
     public static class GameSceneDef

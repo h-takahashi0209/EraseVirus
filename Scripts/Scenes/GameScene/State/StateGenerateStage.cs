@@ -45,7 +45,7 @@ namespace TakahashiH.Scenes.GameScene
         public override void Process(IStateInputData inputData)
         {
             // ステージを読み込んでオブジェクトをスタックに追加
-            if (!mStageLoader.Setup(StageLoader.Mode.Random, mContext.Level, mContext.ObjectStack)) {
+            if (!mStageLoader.Setup(mContext.Level, mContext.ObjectStack)) {
                 return;
             }
 

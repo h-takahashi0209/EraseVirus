@@ -158,8 +158,8 @@ namespace TakahashiH.Scenes.GameScene
         /// </summary>
         private void LotteryNextCapsule()
         {
-            mColorType1 = (ColorType)UnityEngine.Random.Range(0, (int)ColorType.Sizeof);
-            mColorType2 = (ColorType)UnityEngine.Random.Range(0, (int)ColorType.Sizeof);
+            mColorType1 = Settings.ForceColorTypeList.ElementAtOrDefault(0) != ColorType.None ? Settings.ForceColorTypeList.ElementAtOrDefault(0) : (ColorType)UnityEngine.Random.Range(0, (int)ColorType.Sizeof);
+            mColorType2 = Settings.ForceColorTypeList.ElementAtOrDefault(1) != ColorType.None ? Settings.ForceColorTypeList.ElementAtOrDefault(1) : (ColorType)UnityEngine.Random.Range(0, (int)ColorType.Sizeof);
 
             var sprite1 = SpriteLoader.GetPairedHalfCapsuleSprite(mColorType1);
             var sprite2 = SpriteLoader.GetPairedHalfCapsuleSprite(mColorType2);

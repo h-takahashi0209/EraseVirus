@@ -50,12 +50,12 @@ namespace TakahashiH.Scenes.GameScene
         /// <summary>
         /// ペアのブロックがあるXブロック座標
         /// </summary>
-        public int PairedBlockPosX { get; private set; }
+        public int PairedBlockPosX { get; private set; } = -1;
 
         /// <summary>
         /// ペアのブロックがあるYブロック座標
         /// </summary>
-        public int PairedBlockPosY { get; private set; }
+        public int PairedBlockPosY { get; private set; } = -1;
 
 
         //====================================
@@ -141,8 +141,8 @@ namespace TakahashiH.Scenes.GameScene
         /// </summary>
         public void ResetPair()
         {
-            PairedBlockPosX = 0;
-            PairedBlockPosY = 0;
+            PairedBlockPosX = -1;
+            PairedBlockPosY = -1;
 
             var sprite = SpriteLoader.GetHalfCapsuleSprite(ColorType);
 

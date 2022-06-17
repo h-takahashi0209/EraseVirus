@@ -102,8 +102,9 @@ namespace TakahashiH.Scenes.GameScene
                 usedObj.SetActive(false);
 
                 mUnusedObjectList.Add(usedObj);
-                mUsedObjectList.Remove(usedObj);
             }
+
+            mUsedObjectList.Clear();
         }
 
         /// <summary>
@@ -138,11 +139,15 @@ namespace TakahashiH.Scenes.GameScene
         /// <param name="onComplete">    完了時コールバック    </param>
         public void Disappear(int blockPosX, int blockPosY, Action onComplete)
         {
-            if (blockPosX < 0 || blockPosX >= GameSceneDef.BlockNumWidth) {
+            if (blockPosX < 0 || blockPosX >= GameSceneDef.BlockNumWidth)
+            {
+                onComplete();
                 return;
             }
 
-            if (blockPosY < 0 || blockPosY >= GameSceneDef.BlockNumHeight) {
+            if (blockPosY < 0 || blockPosY >= GameSceneDef.BlockNumHeight)
+            {
+                onComplete();
                 return;
             }
 
@@ -169,14 +174,16 @@ namespace TakahashiH.Scenes.GameScene
                 }
             }
 
-            if (targetObj == null) {
+            if (targetObj == null)
+            {
+                onComplete();
                 return;
             }
 
             var targetHalfCapsule = targetObj as HalfCapsule;
 
             // ペアの半カプセルがあればペアを解除する
-            if (targetHalfCapsule != null && (targetHalfCapsule.PairedBlockPosX > 0 || targetHalfCapsule.PairedBlockPosY > 0))
+            if (targetHalfCapsule != null && (targetHalfCapsule.PairedBlockPosX >= 0 || targetHalfCapsule.PairedBlockPosY >= 0))
             {
                 for (int i = 0; i < mUsedObjectList.Count; i++)
                 {

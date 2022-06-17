@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 
@@ -85,7 +86,7 @@ namespace TakahashiH.Scenes.GameScene
                 var usedHalfCapsule = usedObjectList[i] as HalfCapsule;
 
                 // ペアがない半カプセル
-                if (usedHalfCapsule != null && usedHalfCapsule.BlockPosY > 0 && usedHalfCapsule.PairedBlockPosX <= 0 && usedHalfCapsule.PairedBlockPosY <= 0)
+                if (usedHalfCapsule != null && usedHalfCapsule.BlockPosY > 0 && usedHalfCapsule.PairedBlockPosX < 0 && usedHalfCapsule.PairedBlockPosY < 0)
                 {
                     // かつ1つ下に何もなければ落下対象
                     if (mContext.ObjectStack.GetColorType(usedHalfCapsule.BlockPosX, usedHalfCapsule.BlockPosY - 1) == ColorType.None)
@@ -153,16 +154,27 @@ namespace TakahashiH.Scenes.GameScene
         /// </summary>
         private void FallCapsule()
         {
-            bool isCompFallAll = true;
-
             for (int i = 0; i < FellHalfCapsuleGroupMax; i++)
             {
                 if (mFellHalfCapsuleList[i].Count <= 0) {
                     continue;
                 }
 
-                bool isCompFall = false;
+                var isCompFall           = false;
+                var bottomHalfCapsule    = mFellHalfCapsuleList[i][0];
+                int bottomHalfCapsuleIdx = 0;
 
+                // 一番下の半カプセルを取得
+                for (int j = 1; j < mFellHalfCapsuleList[i].Count; j++)
+                {
+                    if (mFellHalfCapsuleList[i][j].BlockPosY < bottomHalfCapsule.BlockPosY)
+                    {
+                        bottomHalfCapsule    = mFellHalfCapsuleList[i][j];
+                        bottomHalfCapsuleIdx = j;
+                    }
+                }
+
+                // 半カプセルを1つずつ落下させていく
                 for (int j = 0; j < mFellHalfCapsuleList[i].Count; j++)
                 {
                     var halfCapsule = mFellHalfCapsuleList[i][j];
@@ -176,8 +188,10 @@ namespace TakahashiH.Scenes.GameScene
                     halfCapsule.SetBlockPos(blockPosX, blockPosY);
                     halfCapsule.SetLocalPosition(new Vector3(localPosX, localPosY, 0f));
 
+                    var bottomColorType = mContext.ObjectStack.GetColorType(halfCapsule.BlockPosX, halfCapsule.BlockPosY - 1);
+
                     // 一番下の半カプセルが着地したら落下完了とする
-                    if (halfCapsule.BlockPosY <= 0 || mContext.ObjectStack.GetColorType(halfCapsule.BlockPosX, halfCapsule.BlockPosY - 1) != ColorType.None)
+                    if (j == bottomHalfCapsuleIdx && (halfCapsule.BlockPosY <= 0 || bottomColorType != ColorType.None))
                     {
                         isCompFall = true;
                     }
@@ -188,9 +202,16 @@ namespace TakahashiH.Scenes.GameScene
                     mCompFallHalfCapsuleList.AddRange(mFellHalfCapsuleList[i]);
                     mFellHalfCapsuleList[i].Clear();
                 }
-                else
+            }
+
+            var isCompFallAll = true;
+
+            for (int i = 0; i < FellHalfCapsuleGroupMax; i++)
+            {
+                if (mFellHalfCapsuleList[i].Any())
                 {
                     isCompFallAll = false;
+                    break;
                 }
             }
 
@@ -204,6 +225,7 @@ namespace TakahashiH.Scenes.GameScene
 
                 mOnComplete(State.DisappearCapsule, inputData);
             }
+            // 残っていればまた落下させる
             else
             {
                 mAutoFallTimer.Begin(Settings.CapsuleDisappearFallTimeSec, () => FallCapsule());
@@ -230,7 +252,7 @@ namespace TakahashiH.Scenes.GameScene
             }
 
             // ペアの半カプセル
-            if (halfCapsule.PairedBlockPosX > 0 || halfCapsule.PairedBlockPosY > 0)
+            if (halfCapsule.PairedBlockPosX >= 0 || halfCapsule.PairedBlockPosY >= 0)
             {
                 var pairedHalfCapsule = GetUsedHalfCapsule(halfCapsule.PairedBlockPosX, halfCapsule.PairedBlockPosY);
                 if (pairedHalfCapsule != null)
@@ -247,20 +269,28 @@ namespace TakahashiH.Scenes.GameScene
             var topHalfCapsule = GetUsedHalfCapsule(halfCapsule.BlockPosX, halfCapsule.BlockPosY + 1);
             if (topHalfCapsule != null)
             {
-                // ペアがなければ追加
-                if (topHalfCapsule.PairedBlockPosX <= 0 && topHalfCapsule.PairedBlockPosY <= 0)
+                // ペアが横に無ければ追加
+                if (topHalfCapsule.PairedBlockPosX < 0 || topHalfCapsule.BlockPosX == topHalfCapsule.PairedBlockPosX)
                 {
                     AddFellHalfCapsule(topHalfCapsule, halfCapsuleList);
                 }
-                // ペアがある
+                // ペアが横にある
                 else
                 {
                     var topPairedHalfCapsule = GetUsedHalfCapsule(topHalfCapsule.PairedBlockPosX, topHalfCapsule.PairedBlockPosY);
                     if (topPairedHalfCapsule != null)
                     {
-                        // 1つ下に半カプセルがなければ追加
-                        if (mContext.ObjectStack.GetColorType(topPairedHalfCapsule.BlockPosX, topPairedHalfCapsule.BlockPosY - 1) == ColorType.None)
+                        // ペアの下に半カプセルが無ければ追加
+                        var topPairedBottomHalfCapsule = GetUsedHalfCapsule(topPairedHalfCapsule.BlockPosX, topPairedHalfCapsule.BlockPosY - 1);
+                        if (topPairedBottomHalfCapsule == null)
                         {
+                            AddFellHalfCapsule(topHalfCapsule, halfCapsuleList);
+                        }
+                        // ペアの上にペアが重なっていたら追加
+                        else if (
+                            topPairedBottomHalfCapsule.PairedBlockPosX >= 0 && topPairedBottomHalfCapsule.PairedBlockPosX == halfCapsule.BlockPosX
+                        &&  topPairedBottomHalfCapsule.PairedBlockPosY >= 0 && topPairedBottomHalfCapsule.PairedBlockPosY == halfCapsule.BlockPosY
+                        ) {
                             AddFellHalfCapsule(topHalfCapsule, halfCapsuleList);
                         }
                     }

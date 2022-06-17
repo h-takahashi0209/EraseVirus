@@ -143,6 +143,12 @@ namespace TakahashiH.Scenes.GameScene
             // 縦 → 横
             if (Direction == CapsuleDirection.Vertial)
             {
+                // 右端で回転する場合、カプセルがはみ出ないよう左に移動
+                if (BlockPositionX == (GameSceneDef.BlockNumWidth - 1))
+                {
+                    UpdatePosition(BlockPositionX - 1, BlockPositionY);
+                }
+
                 // 左回転
                 if (direction == RotateDirection.Left)
                 {
@@ -156,19 +162,8 @@ namespace TakahashiH.Scenes.GameScene
                 // 右回転
                 else if (direction == RotateDirection.Right)
                 {
-                    // 右端で右回転
-                    // カプセルがはみ出ないよう左に移動
-                    if (BlockPositionX == (GameSceneDef.BlockNumWidth - 1))
-                    {
-                        UpdatePosition(BlockPositionX - 1, BlockPositionY);
-
-                        mHalfCapsuleList[0].SetLocalPosition(Vector3.zero);
-                        mHalfCapsuleList[1].SetLocalPosition(new Vector3(GameSceneDef.OneBlockSize, 0f, 0f));
-                    }
-                    else
-                    {
-                        mHalfCapsuleList[1].SetLocalPosition(new Vector3(GameSceneDef.OneBlockSize, 0f, 0f));
-                    }
+                    mHalfCapsuleList[0].SetLocalPosition(Vector3.zero);
+                    mHalfCapsuleList[1].SetLocalPosition(new Vector3(GameSceneDef.OneBlockSize, 0f, 0f));
                 }
 
                 mHalfCapsuleList[0].SetEulerAnglesZ(-90f);

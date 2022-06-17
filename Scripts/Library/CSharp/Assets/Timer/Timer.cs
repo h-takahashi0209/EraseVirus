@@ -57,6 +57,12 @@ namespace TakahashiH
         /// <param name="onComplete">    完了時コールバック    </param>
         public void Begin(float timeSec, Action onComplete)
         {
+            if (timeSec <= 0f)
+            {
+                onComplete?.Invoke();
+                return;
+            }
+
             mRemainingTimeSec   = timeSec;
             IsActive            = true;
             mIsPause            = false;
